@@ -1,7 +1,7 @@
 import React from 'react';
 
 function Contact() {
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     alert("Mensaje enviado con éxito. ¡Gracias por contactarnos!");
   };
@@ -23,7 +23,7 @@ function Contact() {
 
 export default Contact;
 
-const styles: { [key: string]: React.CSSProperties } = {
+const styles = {
     contenedor: {
         padding: '40px',
         textAlign: 'center',

@@ -1,28 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import ListaProductos from '../Productos/ListaProductos';
+import ListaProductos from '../Productos/ListaProductos.jsx';
 import Carrito from '../Carrito/Carrito';
-import { type Producto } from '../../types';
 
 
-const MOCKAPI_URL = 'https://mockapi.io/clone/68fa7f3eef8b2e621e80281b/api/v1/productos'; 
+const MOCKAPI_URL = 'https://68fa7f3eef8b2e621e80281a.mockapi.io/api/v1/productos'; 
 
-// Props vienen de App.tsx
-interface MainContentProps {
-  carrito: Producto[];
-  agregarProducto: (producto: Producto) => void;
-  vaciarCarrito: () => void;
-}
 
-function MainContent({ carrito, agregarProducto, vaciarCarrito }: MainContentProps) {
+function MainContent({ carrito, agregarProducto, vaciarCarrito }) {
   
 
-  const [productos, setProductos] = useState<Producto[]>([]);
-  const [cargando, setCargando] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [productos, setProductos] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(null);
 
 
   useEffect(() => {
-
+    // 1. Iniciar el estado de carga
     setCargando(true);
     setError(null);
 
@@ -31,16 +24,17 @@ function MainContent({ carrito, agregarProducto, vaciarCarrito }: MainContentPro
         const respuesta = await fetch(MOCKAPI_URL);
         
         if (!respuesta.ok) {
-          // Si la respuesta HTTP no es exitosa
+          // Si la respuesta HTTP no es exitosa (ej. 404, 500)
           throw new Error(`Error en la solicitud: Código ${respuesta.status}`);
         }
         
-        const data: any[] = await respuesta.json();
+        const data = await respuesta.json();
 
-
-        const productosMapeados: Producto[] = data.map((item) => ({
+        // 2. Mapeo para asegurar que los nombres de las propiedades sean correctos
+        const productosMapeados = data.map((item) => ({
              id: item.id,
-             nombre: item.nombre || item.name || 'Producto Desconocido',
+             
+             nombre: item.nombre || 'Producto Desconocido', 
              precio: item.precio || 19.99, 
         }));
 
@@ -49,35 +43,31 @@ function MainContent({ carrito, agregarProducto, vaciarCarrito }: MainContentPro
         setCargando(false); // Carga exitosa
 
       } catch (err) {
-        // ⚙️ Requisito: Gestiona posibles errores
         console.error("Error al obtener datos:", err);
         setError("Error al cargar productos. Por favor, inténtalo más tarde."); 
-        setCargando(false); // Carga terminada con error
+        setCargando(false); 
       }
     };
 
     obtenerProductos();
     
-  }, []); // Array vacío: se ejecuta solo al montar (componentDidMount)
+  }, []); 
 
-  // --- Renderizado Condicional del Contenido ---
+
+  // 3. Renderizado Condicional
   let contenidoProductos;
   
   if (cargando) {
-    
     contenidoProductos = <p style={styles.mensajeEstado}>Cargando productos... 🔄</p>;
   } else if (error) {
-   
     contenidoProductos = <p style={{...styles.mensajeEstado, color: 'red'}}>{error}</p>;
   } else if (productos.length === 0) {
-     
      contenidoProductos = <p style={styles.mensajeEstado}>No se encontraron productos.</p>;
   }
   else {
-
     contenidoProductos = (
         <ListaProductos 
-            productos={productos} // Usamos los productos obtenidos de la API
+            productos={productos}
             onAgregarProducto={agregarProducto} 
         />
     );
@@ -91,7 +81,7 @@ function MainContent({ carrito, agregarProducto, vaciarCarrito }: MainContentPro
           {contenidoProductos}
       </div>
       
-      {}
+      {/* Pasar el estado y las funciones del carrito */}
       <Carrito 
           productosSeleccionados={carrito} 
           onVaciarCarrito={vaciarCarrito} 
@@ -102,7 +92,7 @@ function MainContent({ carrito, agregarProducto, vaciarCarrito }: MainContentPro
 
 export default MainContent;
 
-const styles: { [key: string]: React.CSSProperties } = {
+const styles = {
     contenedor: {
         display: 'flex',
         justifyContent: 'space-between',
